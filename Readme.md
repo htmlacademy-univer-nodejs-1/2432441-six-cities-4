@@ -1,7 +1,7 @@
 # Личный проект «Шесть городов»
 
 * Студент: [Денис Филимонов](https://up.htmlacademy.ru/univer-nodejs-api/4/user/2432441).
-* Наставник: [Глеб Клецков](https://www.youtube.com/watch?v=xMHJGd3wwZk).
+* Наставник: [Глеб Клецков](https://htmlacademy.ru/profile/id1487865).
 
 ---
 
