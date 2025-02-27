@@ -2,18 +2,13 @@ import fs from "node:fs";
 import { Offer, City, HousingType, Amenity } from "../models/offer.js";
 
 export class Importer {
-  public importOffers(filename: string): Offer[] {
+  public static importOffers(filename: string): Offer[] {
     const fileContent = fs.readFileSync(filename, "utf-8");
-    const lines = fileContent.split("\n").slice(1);
-
-    const offers: Offer[] = [];
-    lines.forEach((line) => {
-      const splitLine = line.split("\t");
-      if (splitLine.length !== 18) {
-        return;
-      }
-
-      const [
+    return fileContent
+      .split("\n")
+      .filter((row) => row.trim().length > 0)
+      .map((line) => line.split("\t"))
+      .map(([
         id,
         title,
         description,
@@ -32,9 +27,7 @@ export class Importer {
         author,
         commentsCount,
         coordinates,
-      ] = splitLine;
-
-      offers.push({
+      ]) => ({
         id,
         title,
         description,
@@ -47,7 +40,7 @@ export class Importer {
           string,
           string,
           string,
-          string,
+          string
         ],
         isPremium: isPremium === "true",
         isFavorite: isFavorite === "true",
@@ -63,8 +56,6 @@ export class Importer {
           latitude: parseFloat(coordinates.split(",")[0]),
           longitude: parseFloat(coordinates.split(",")[1]),
         },
-      });
-    });
-    return offers;
+      }));
   }
 }

@@ -10,11 +10,9 @@ program
   .command("import <source>")
   .description("impport .tsv mock file")
   .action((source) => {
-    const importer = new Importer();
-    const offers = importer.importOffers(source);
+    const offers = Importer.importOffers(source);
 
-    const printer = new Printer();
-    printer.printOffers(offers);
+    Printer.printOffers(offers);
   });
 
 program.parse(process.argv);
