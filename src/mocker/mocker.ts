@@ -8,7 +8,7 @@ export class Mocker {
     const reader = readline.createInterface({ input: fileStream });
 
     for await (const line of reader) {
-      if (line.trim().length == 0) continue;
+      if (line.trim().length === 0) continue;
 
       const [
         id,
