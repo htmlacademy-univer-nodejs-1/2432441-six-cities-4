@@ -1,18 +1,30 @@
 #!/usr/bin/env node
 
 import { program } from "commander";
-import { Importer } from "./importer/importer.js";
+import { Mocker } from "./mocker/mocker.js";
 import { Printer } from "./printer/printer.js";
+import { Generator } from "./generator/generator.js";
 
 program.name("six-cities").version(process.env.npm_package_version ?? "");
 
 program
   .command("import <source>")
   .description("impport .tsv mock file")
-  .action((source) => {
-    const offers = Importer.importOffers(source);
+  .action(async (source) => {
+    const offers = Mocker.importOffers(source);
 
-    Printer.printOffers(offers);
+    await Printer.printOffers(offers);
+  });
+
+program
+  .command("generate <n> <filepath> <url>")
+  .description("generate n test items")
+  .action(async (n, filename, url) => {
+    const generator = new Generator();
+    await generator.load(url);
+
+    const offers = generator.generateOffers(n);
+    await Mocker.exportOffers(filename, offers);
   });
 
 program.parse(process.argv);
