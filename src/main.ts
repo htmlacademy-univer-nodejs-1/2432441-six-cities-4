@@ -4,8 +4,15 @@ import { program } from "commander";
 import { Mocker } from "./mocker/mocker.js";
 import { Printer } from "./printer/printer.js";
 import { Generator } from "./generator/generator.js";
+import { DIContainer } from "./dicontainer.js";
 
 program.name("six-cities").version(process.env.npm_package_version ?? "");
+
+program.description("run application").action(() => {
+  const container = new DIContainer();
+  const application = container.getApplication();
+  application.init();
+});
 
 program
   .command("import <source>")
