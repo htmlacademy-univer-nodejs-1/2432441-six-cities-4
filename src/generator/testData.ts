@@ -18,4 +18,6 @@ export type TestData = {
   author: string[];
   commentsCount: number[];
   coordinates: { latitude: number; longitude: number }[];
+  createdAt: Date[];
+  updatedAt: Date[];
 };

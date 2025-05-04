@@ -1,9 +1,10 @@
 import got from "got";
 import random from "random";
-import { v4 as uuidv4 } from "uuid";
 
 import { TestData } from "./testData.js";
-import { Offer } from "../models/offer.js";
+import { Amenity, City, HousingType, Offer } from "../models/offer.js";
+import { User } from "../models/user.js";
+import { Ref } from "@typegoose/typegoose";
 
 export class Generator {
   private data: TestData | undefined;
@@ -22,24 +23,25 @@ export class Generator {
     if (this.data === undefined) throw Error("you must load the data first");
 
     return {
-      id: uuidv4(),
       title: random.choice(this.data.title)!,
       description: random.choice(this.data.description)!,
       publicationDate: random.choice(this.data.publicationDate)!,
-      city: random.choice(this.data.city)!,
+      city: random.choice(this.data.city)! as City,
       previewImage: random.choice(this.data.previewImage)!,
       images: random.choice(this.data.images)!,
       isPremium: random.choice(this.data.isPremium)!,
       isFavorite: random.choice(this.data.isFavorite)!,
       rating: random.choice(this.data.rating)!,
-      type: random.choice(this.data.type)!,
+      type: random.choice(this.data.type)! as HousingType,
       bedrooms: random.choice(this.data.bedrooms)!,
       maxGuests: random.choice(this.data.maxGuests)!,
       price: random.choice(this.data.price)!,
-      amenities: random.choice(this.data.amenities)!,
-      author: random.choice(this.data.author)!,
+      amenities: random.choice(this.data.amenities)! as Amenity[],
+      author: random.choice(this.data.author)! as unknown as Ref<User>,
       commentsCount: random.choice(this.data.commentsCount)!,
       coordinates: random.choice(this.data.coordinates)!,
+      createdAt: random.choice(this.data.createdAt)!,
+      updatedAt: random.choice(this.data.updatedAt)!,
     };
   }
 }
