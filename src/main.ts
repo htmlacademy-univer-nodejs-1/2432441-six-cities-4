@@ -2,7 +2,6 @@
 
 import { program } from "commander";
 import { Mocker } from "./mocker/mocker.js";
-import { Printer } from "./printer/printer.js";
 import { Generator } from "./generator/generator.js";
 import { DIContainer } from "./dicontainer.js";
 
@@ -15,12 +14,22 @@ program.description("run application").action(() => {
 });
 
 program
-  .command("import <source>")
-  .description("impport .tsv mock file")
-  .action(async (source) => {
-    const offers = Mocker.importOffers(source);
+  .command("import <source> <db-uri>")
+  .description("Import .tsv mock file to MongoDB")
+  .action(async (source, dbUri) => {
+    const container = new DIContainer();
+    const importer = container.getImporter();
+    const databaseClient = container.getDatabaseClient();
+    await databaseClient.connect(dbUri);
 
-    await Printer.printOffers(offers);
+    try {
+      const offers = Mocker.readOffers(source);
+      await importer.import(offers);
+    } catch (error) {
+      console.error("Failed to import data:", error);
+    } finally {
+      await databaseClient.disconnect();
+    }
   });
 
 program
@@ -31,7 +40,7 @@ program
     await generator.load(url);
 
     const offers = generator.generateOffers(n);
-    await Mocker.exportOffers(filename, offers);
+    await Mocker.writeOffers(filename, offers);
   });
 
 program.parse(process.argv);

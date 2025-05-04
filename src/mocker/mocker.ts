@@ -1,17 +1,22 @@
 import fs from "node:fs";
 import readline from "node:readline";
 import { Offer, City, HousingType, Amenity } from "../models/offer.js";
+import { Ref } from "@typegoose/typegoose";
+import { User } from "../models/user.js";
 
 export class Mocker {
-  public static async *importOffers(filename: string): AsyncIterable<Offer> {
+  public static async *readOffers(filename: string): AsyncIterable<Offer> {
     const fileStream = fs.createReadStream(filename, "utf-8");
     const reader = readline.createInterface({ input: fileStream });
 
+    let isFirstLine = true;
     for await (const line of reader) {
-      if (line.trim().length === 0) continue;
+      if (isFirstLine || line.trim().length === 0) {
+        isFirstLine = false;
+        continue;
+      }
 
       const [
-        id,
         title,
         description,
         publicationDate,
@@ -29,10 +34,11 @@ export class Mocker {
         author,
         commentsCount,
         coordinates,
+        createdAt,
+        updatedAt,
       ] = line.split("\t");
 
       yield {
-        id,
         title,
         description,
         publicationDate: new Date(publicationDate),
@@ -54,21 +60,23 @@ export class Mocker {
         maxGuests: parseInt(maxGuests, 10),
         price: parseInt(price, 10),
         amenities: amenities.split(",") as Amenity[],
-        author,
+        author: author as unknown as Ref<User>,
         commentsCount: parseInt(commentsCount, 10),
         coordinates: {
           latitude: parseFloat(coordinates.split(",")[0]),
           longitude: parseFloat(coordinates.split(",")[1]),
         },
+        createdAt: new Date(createdAt),
+        updatedAt: new Date(updatedAt),
       };
     }
     fileStream.close();
   }
 
-  public static async exportOffers(filename: string, offers: Iterable<Offer>) {
+  public static async writeOffers(filename: string, offers: Iterable<Offer>) {
     const file = fs.createWriteStream(filename);
     file.write(
-      "id	title	description	publicationDate	city	previewImage	images	isPremium	isFavorite	rating	type	bedrooms	maxGuests	price	amenities	author	commentsCount	coordinates\n",
+      "title	description	publicationDate	city	previewImage	images	isPremium	isFavorite	rating	type	bedrooms	maxGuests	price	amenities	author	commentsCount	coordinates	createdAt	updatedAt\n",
     );
     for (const offer of offers) {
       file.write(this.offerToTsv(offer));
@@ -83,7 +91,6 @@ export class Mocker {
     const coordinatesString = `${offer.coordinates.latitude},${offer.coordinates.longitude}`;
 
     const fields = [
-      offer.id,
       offer.title,
       offer.description,
       offer.publicationDate,
@@ -101,6 +108,8 @@ export class Mocker {
       offer.author,
       offer.commentsCount.toString(),
       coordinatesString,
+      offer.createdAt,
+      offer.updatedAt,
     ];
     return fields.join("\t");
   }
