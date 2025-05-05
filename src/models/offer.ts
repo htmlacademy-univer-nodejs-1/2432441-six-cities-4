@@ -3,12 +3,12 @@ import { BaseModel } from "./base.js";
 import { User } from "./user.js";
 
 export enum City {
-  Moscow = "Moscow",
-  SaintPetersburg = "Saint Petersburg",
-  Novosibirsk = "Novosibirsk",
-  Yekaterinburg = "Yekaterinburg",
-  Kazan = "Kazan",
-  NizhnyNovgorod = "Nizhny Novgorod",
+  Paris = "Paris",
+  Cologne = "Cologne",
+  Brussels = "Brussels",
+  Amsterdam = "Amsterdam",
+  Hamburg = "Hamburg",
+  Dusseldorf = "Dusseldorf",
 }
 
 export enum HousingType {
@@ -40,7 +40,7 @@ export class Offer extends BaseModel {
   @prop({ required: true, trim: true, minlength: 10, maxlength: 100 })
   public title!: string;
 
-  @prop({ required: true, trim: true, minlength: 10, maxlength: 1024 })
+  @prop({ required: true, trim: true, minlength: 20, maxlength: 1024 })
   public description!: string;
 
   @prop({ required: true })
