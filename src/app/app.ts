@@ -4,8 +4,8 @@ import { Component } from "../component.js";
 import { ConfigProvider } from "../config/provider.js";
 
 export class Application {
-  private log: pino.Logger;
-  private configProvider: ConfigProvider;
+  private readonly log: pino.Logger;
+  private readonly configProvider: ConfigProvider;
 
   constructor(
     @inject(Component.Log) log: pino.Logger,

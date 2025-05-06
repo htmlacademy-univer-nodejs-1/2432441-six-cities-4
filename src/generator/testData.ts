@@ -8,15 +8,12 @@ export type TestData = {
   previewImage: string[];
   images: [string, string, string, string, string, string][];
   isPremium: boolean[];
-  isFavorite: boolean[];
-  rating: number[];
   type: HousingType[];
   bedrooms: number[];
   maxGuests: number[];
   price: number[];
   amenities: Amenity[][];
   author: string[];
-  commentsCount: number[];
   coordinates: { latitude: number; longitude: number }[];
   createdAt: Date[];
   updatedAt: Date[];

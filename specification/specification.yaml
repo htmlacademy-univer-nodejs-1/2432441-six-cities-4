@@ -22,6 +22,15 @@ components:
       bearerFormat: JWT
 
   schemas:
+    LoginResponse:
+      type: object
+      properties:
+        token:
+          type: string
+          description: JWT token for authentication
+      required:
+        - token
+
     User:
       type: object
       properties:
@@ -761,10 +770,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  token:
-                    type: string
+                $ref: "#/components/schemas/LoginResponse"
         "401":
           description: Invalid credentials
           content:

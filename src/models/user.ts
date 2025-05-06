@@ -1,5 +1,6 @@
-import { prop, getModelForClass } from "@typegoose/typegoose";
+import { prop, Ref } from "@typegoose/typegoose";
 import { BaseModel } from "./base.js";
+import { Offer } from "./offer.js";
 
 export enum UserType {
   Regular = "regular",
@@ -21,6 +22,7 @@ export class User extends BaseModel {
 
   @prop({ required: true, enum: UserType })
   public type!: UserType;
-}
 
-export const UserModel = getModelForClass(User);
+  @prop({ ref: () => Offer, default: [] })
+  public favorites!: Ref<Offer>[];
+}

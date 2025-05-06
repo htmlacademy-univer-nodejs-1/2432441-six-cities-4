@@ -7,7 +7,7 @@ import { Config } from "./types.js";
 
 @injectable()
 export class ConfigProvider {
-  private log: pino.Logger;
+  private readonly log: pino.Logger;
   private config!: Config;
 
   constructor(@inject(Component.Log) log: pino.Logger) {
