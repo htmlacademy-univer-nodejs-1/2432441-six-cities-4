@@ -30,18 +30,16 @@ export class Generator {
       previewImage: random.choice(this.data.previewImage)!,
       images: random.choice(this.data.images)!,
       isPremium: random.choice(this.data.isPremium)!,
-      isFavorite: random.choice(this.data.isFavorite)!,
-      rating: random.choice(this.data.rating)!,
       type: random.choice(this.data.type)! as HousingType,
       bedrooms: random.choice(this.data.bedrooms)!,
       maxGuests: random.choice(this.data.maxGuests)!,
       price: random.choice(this.data.price)!,
       amenities: random.choice(this.data.amenities)! as Amenity[],
       author: random.choice(this.data.author)! as unknown as Ref<User>,
-      commentsCount: random.choice(this.data.commentsCount)!,
       coordinates: random.choice(this.data.coordinates)!,
       createdAt: random.choice(this.data.createdAt)!,
       updatedAt: random.choice(this.data.updatedAt)!,
+      comments: [],
     };
   }
 }

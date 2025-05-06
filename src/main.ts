@@ -18,9 +18,9 @@ program
   .description("Import .tsv mock file to MongoDB")
   .action(async (source, dbUri) => {
     const container = new DIContainer();
-    const importer = container.getImporter();
     const databaseClient = container.getDatabaseClient();
     await databaseClient.connect(dbUri);
+    const importer = container.getImporter();
 
     try {
       const offers = Mocker.readOffers(source);

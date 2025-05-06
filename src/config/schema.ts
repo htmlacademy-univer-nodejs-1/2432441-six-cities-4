@@ -11,22 +11,16 @@ export default convict<Config>({
     env: "PORT",
     default: 8080,
   },
-  SALT: {
-    doc: "Salt for password hashing",
+  DB_URI: {
+    doc: "URI of database",
     format: String,
-    env: "SALT",
+    env: "DB_URI",
+    default: "mongodb://admin:test@localhost:27017",
+  },
+  JWT_SECRET: {
+    doc: "Secret key for JWT",
+    format: String,
+    env: "JWT_SECRET",
     default: null,
-  },
-  DB_HOST: {
-    doc: "IP address of database",
-    format: "ipaddress",
-    env: "DB_HOST",
-    default: "127.0.0.1",
-  },
-  DB_PORT: {
-    doc: "Port of database",
-    format: "port",
-    env: "DB_PORT",
-    default: 27017,
   },
 });

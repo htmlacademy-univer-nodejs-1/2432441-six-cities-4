@@ -1,6 +1,7 @@
-import { prop, getModelForClass, Ref } from "@typegoose/typegoose";
+import { prop, Ref } from "@typegoose/typegoose";
 import { BaseModel } from "./base.js";
 import { User } from "./user.js";
+import { Comment } from "./comment.js";
 
 export enum City {
   Paris = "Paris",
@@ -62,12 +63,6 @@ export class Offer extends BaseModel {
   @prop({ required: true, default: false })
   public isPremium!: boolean;
 
-  @prop({ required: true, default: false })
-  public isFavorite!: boolean;
-
-  @prop({ required: true, min: 1, max: 5 })
-  public rating!: number;
-
   @prop({ required: true, enum: HousingType })
   public type!: HousingType;
 
@@ -86,11 +81,9 @@ export class Offer extends BaseModel {
   @prop({ required: true, ref: () => User })
   public author!: Ref<User>;
 
-  @prop({ required: true, default: 0 })
-  public commentsCount!: number;
-
   @prop({ required: true, type: () => Location })
   public coordinates!: Location;
-}
 
-export const OfferModel = getModelForClass(Offer);
+  @prop({ ref: () => Comment, default: [] })
+  public comments!: Ref<Comment>[];
+}
