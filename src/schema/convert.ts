@@ -9,7 +9,11 @@ import {
 
 export function convertUserToSchema(user: User): SchemaUser {
   return {
-    ...user,
+    id: user._id,
+    name: user.name,
+    email: user.email,
+    avatar: user.avatar,
+    type: user.type,
     createdAt: user.createdAt?.toISOString(),
     updatedAt: user.updatedAt?.toISOString(),
   };
@@ -22,21 +26,38 @@ export function convertOfferToSchema(
   commentsCount: number,
 ): SchemaOffer {
   return {
-    ...offer,
+    id: offer._id,
+    title: offer.title,
+    description: offer.description,
+    publicationDate: offer.publicationDate.toISOString(),
+    city: offer.city,
+    previewImage: offer.previewImage,
+    images: offer.images,
+    isPremium: offer.isPremium,
     isFavorite: isFavorite,
     rating: rating,
+    type: offer.type,
+    bedrooms: offer.bedrooms,
+    maxGuests: offer.maxGuests,
+    price: offer.price,
+    amenities: offer.amenities,
     author: convertUserToSchema(offer.author as User),
-    publicationDate: offer.publicationDate.toISOString(),
+    commentsCount: commentsCount,
+    coordinates: {
+      latitude: offer.coordinates.latitude,
+      longitude: offer.coordinates.longitude,
+    },
     createdAt: offer.createdAt?.toISOString(),
     updatedAt: offer.updatedAt?.toISOString(),
-    commentsCount: commentsCount,
   };
 }
 
 export function convertCommentToSchema(comment: Comment): SchemaComment {
   return {
-    ...comment,
-    createdAt: comment.createdAt?.toISOString(),
+    id: comment._id,
+    text: comment.text,
+    rating: comment.rating,
     author: convertUserToSchema(comment.author as User),
+    createdAt: comment.createdAt?.toISOString(),
   };
 }

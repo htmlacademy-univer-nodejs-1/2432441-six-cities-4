@@ -32,12 +32,19 @@ export class CommentRepository {
       .limit(limit)
       .exec();
   }
-  
 
-  async countAndRatingByOfferId(offerId: string): Promise<{ count: number; rating: number }> {
+  async countAndRatingByOfferId(
+    offerId: string,
+  ): Promise<{ count: number; rating: number }> {
     const comments = await this.model.aggregate([
       { $match: { offerId: offerId } },
-      { $group: { _id: "$offerId", count: { $sum: 1 }, rating: { $avg: "$rating" } } },
+      {
+        $group: {
+          _id: "$offerId",
+          count: { $sum: 1 },
+          rating: { $avg: "$rating" },
+        },
+      },
     ]);
     return comments[0] || { count: 0, rating: 0 };
   }
@@ -47,7 +54,13 @@ export class CommentRepository {
   ): Promise<Record<string, { count: number; rating: number }>> {
     const comments = await this.model.aggregate([
       { $match: { offerId: { $in: offerIds } } },
-      { $group: { _id: "$offerId", count: { $sum: 1 }, rating: { $avg: "$rating" } } },
+      {
+        $group: {
+          _id: "$offerId",
+          count: { $sum: 1 },
+          rating: { $avg: "$rating" },
+        },
+      },
     ]);
 
     return offerIds.reduce(

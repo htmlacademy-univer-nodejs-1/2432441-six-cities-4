@@ -7,8 +7,13 @@ import { DIContainer } from "./dicontainer.js";
 
 program.name("six-cities").version(process.env.npm_package_version ?? "");
 
-program.description("run application").action(() => {
+program.description("run application").action(async () => {
   const container = new DIContainer();
+
+  const databaseClient = container.getDatabaseClient();
+  const configProvider = container.getConfigProvider();
+  await databaseClient.connect(configProvider.get().DB_URI);
+
   const application = container.getApplication();
   application.init();
 });
