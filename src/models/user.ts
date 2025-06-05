@@ -17,7 +17,7 @@ export class User extends BaseModel {
   @prop()
   public avatar?: string;
 
-  @prop({ required: true, minlength: 6, maxlength: 12 })
+  @prop({ required: true })
   public password!: string;
 
   @prop({ required: true, enum: UserType })

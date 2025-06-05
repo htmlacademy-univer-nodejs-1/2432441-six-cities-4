@@ -7,4 +7,12 @@ export const Component = {
   CommentRepository: Symbol.for("CommentRepository"),
   Importer: Symbol.for("Importer"),
   Database: Symbol.for("Database"),
+  ExceptionFilter: Symbol.for("ExceptionFilter"),
+  OfferController: Symbol.for("OfferController"),
+  UserController: Symbol.for("UserController"),
+  FavouriteController: Symbol.for("FavouriteController"),
+  OfferService: Symbol.for("OfferService"),
+  UserService: Symbol.for("UserService"),
+  CommentService: Symbol.for("CommentService"),
+  FavouriteService: Symbol.for("FavouriteService"),
 } as const;

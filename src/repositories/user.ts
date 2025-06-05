@@ -52,14 +52,27 @@ export class UserRepository {
 
   public async isFavorite(userId: string, offerId: string): Promise<boolean> {
     const user = await this.model.findById(userId).exec();
-    return user?.favorites?.some((favorite) => (favorite as Offer)._id === offerId) ?? false;
+    return (
+      user?.favorites?.some(
+        (favorite) => (favorite as Offer)._id === offerId,
+      ) ?? false
+    );
   }
 
-  public async areFavorites(userId: string, offerIds: string[]): Promise<Record<string, boolean>> {
+  public async areFavorites(
+    userId: string,
+    offerIds: string[],
+  ): Promise<Record<string, boolean>> {
     const user = await this.model.findById(userId).exec();
-    return offerIds.reduce((acc, offerId) => {
-      acc[offerId] = user?.favorites?.some((favorite) => (favorite as Offer)._id === offerId) ?? false;
-      return acc;
-    }, {} as Record<string, boolean>);
+    return offerIds.reduce(
+      (acc, offerId) => {
+        acc[offerId] =
+          user?.favorites?.some(
+            (favorite) => (favorite as Offer)._id === offerId,
+          ) ?? false;
+        return acc;
+      },
+      {} as Record<string, boolean>,
+    );
   }
 }

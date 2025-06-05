@@ -16,6 +16,8 @@ import {
   City,
   HousingType,
 } from "../models/offer.js";
+import { ApiError } from "../app/errors/api-error.js";
+import { StatusCodes } from "http-status-codes";
 
 @injectable()
 export class OfferService {
@@ -45,9 +47,13 @@ export class OfferService {
     return this.enrichOffers(offers, userId);
   }
 
-  public async createOffer(request: CreateOfferRequest): Promise<Offer> {
+  public async createOffer(
+    userId: string,
+    request: CreateOfferRequest,
+  ): Promise<Offer> {
     const offer = await this.offerRepository.create({
       ...request,
+      author: userId,
       city: request.city as City,
       type: request.type as HousingType,
       amenities: request.amenities as Amenity[],
@@ -67,10 +73,13 @@ export class OfferService {
     return convertOfferToSchema(offer, false, 0, 0);
   }
 
-  public async getOffer(userId: string | undefined, id: string): Promise<Offer> {
+  public async getOffer(
+    userId: string | undefined,
+    id: string,
+  ): Promise<Offer> {
     const offer = await this.offerRepository.findById(id);
     if (!offer) {
-      throw new Error("Offer not found");
+      throw new ApiError(StatusCodes.NOT_FOUND, "Offer not found");
     }
 
     return this.enrichOffer(offer, userId);
@@ -96,19 +105,15 @@ export class OfferService {
     });
 
     if (!updatedOffer) {
-      throw new Error("Offer not found");
+      throw new ApiError(StatusCodes.NOT_FOUND, "Offer not found");
     }
 
     this.log.info(`Offer updated: ${updatedOffer._id}`);
 
-    const { rating, count } = await this.commentRepository.countAndRatingByOfferId(updatedOffer._id!);
+    const { rating, count } =
+      await this.commentRepository.countAndRatingByOfferId(updatedOffer._id!);
 
-    return convertOfferToSchema(
-      updatedOffer,
-      false,
-      rating,
-      count,
-    );
+    return convertOfferToSchema(updatedOffer, false, rating, count);
   }
 
   public async deleteOffer(id: string): Promise<void> {
@@ -121,20 +126,25 @@ export class OfferService {
     limit: number,
     skip: number,
   ): Promise<Offer[]> {
-    const offers = await this.offerRepository.findPremiumByCity(city,limit,skip);
+    const offers = await this.offerRepository.findPremiumByCity(
+      city,
+      limit,
+      skip,
+    );
     return this.enrichOffers(offers);
   }
 
-  private async enrichOffer(offer: OfferModel, userId?: string): Promise<Offer> {
-    const isFavorite = userId ? await this.userRepository.isFavorite(userId, offer._id!) : false;
-    const { rating, count } = await this.commentRepository.countAndRatingByOfferId(offer._id!);
+  private async enrichOffer(
+    offer: OfferModel,
+    userId?: string,
+  ): Promise<Offer> {
+    const isFavorite = userId
+      ? await this.userRepository.isFavorite(userId, offer._id!)
+      : false;
+    const { rating, count } =
+      await this.commentRepository.countAndRatingByOfferId(offer._id!);
 
-    return convertOfferToSchema(
-      offer,
-      isFavorite,
-      rating,
-      count,
-    );
+    return convertOfferToSchema(offer, isFavorite, rating, count);
   }
 
   private async enrichOffers(
@@ -142,8 +152,11 @@ export class OfferService {
     userId?: string,
   ): Promise<Offer[]> {
     const offerIds = offers.map((offer) => offer._id!);
-    const favourites = userId ? await this.userRepository.areFavorites(userId, offerIds) : {};
-    const commentsCount = await this.commentRepository.countAndRatingByOfferIds(offerIds);
+    const favourites = userId
+      ? await this.userRepository.areFavorites(userId, offerIds)
+      : {};
+    const commentsCount =
+      await this.commentRepository.countAndRatingByOfferIds(offerIds);
 
     return offers.map((offer) =>
       convertOfferToSchema(

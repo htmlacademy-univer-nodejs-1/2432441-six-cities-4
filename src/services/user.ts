@@ -11,6 +11,8 @@ import {
 import bcrypt from "bcrypt";
 import { ConfigProvider } from "../config/provider.js";
 import jwt from "jsonwebtoken";
+import { ApiError as ApiError } from "../app/errors/api-error.js";
+import { StatusCodes } from "http-status-codes";
 
 @injectable()
 export class UserService {
@@ -39,7 +41,10 @@ export class UserService {
   public async createUser(request: CreateUserRequest): Promise<User> {
     const existingUser = await this.userRepository.findByEmail(request.email);
     if (existingUser) {
-      throw new Error("User with this email already exists");
+      throw new ApiError(
+        StatusCodes.BAD_REQUEST,
+        "User with this email already exists",
+      );
     }
 
     const hashedPassword = await bcrypt.hash(request.password, 10);
@@ -58,7 +63,7 @@ export class UserService {
   public async login(request: LoginRequest): Promise<LoginResponse> {
     const user = await this.userRepository.findByEmail(request.email);
     if (!user) {
-      throw new Error("User not found");
+      throw new ApiError(StatusCodes.NOT_FOUND, "User not found");
     }
 
     const isValidPassword = await bcrypt.compare(
@@ -66,7 +71,7 @@ export class UserService {
       user.password,
     );
     if (!isValidPassword) {
-      throw new Error("Invalid password");
+      throw new ApiError(StatusCodes.BAD_REQUEST, "Invalid password");
     }
 
     const token = jwt.sign(
