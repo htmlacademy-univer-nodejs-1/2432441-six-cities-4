@@ -1,9 +1,9 @@
 import { getModelForClass } from "@typegoose/typegoose";
-import { Comment } from "../models/comment.js";
 import { inject, injectable } from "inversify";
-import { Database } from "../database/database.js";
+import { Model, Types } from "mongoose";
 import { Component } from "../component.js";
-import { Model } from "mongoose";
+import { Database } from "../database/database.js";
+import { Comment } from "../models/comment.js";
 
 @injectable()
 export class CommentRepository {
@@ -36,36 +36,63 @@ export class CommentRepository {
   async countAndRatingByOfferId(
     offerId: string,
   ): Promise<{ count: number; rating: number }> {
-    const comments = await this.model.aggregate([
-      { $match: { offerId: offerId } },
+    const result = await this.model.aggregate([
+      { $match: { offer: new Types.ObjectId(offerId) } },
       {
         $group: {
-          _id: "$offerId",
+          _id: null,
           count: { $sum: 1 },
-          rating: { $avg: "$rating" },
+          totalRating: { $sum: "$rating" },
+        },
+      },
+      {
+        $project: {
+          _id: 0,
+          count: 1,
+          rating: { $divide: ["$totalRating", "$count"] },
         },
       },
     ]);
-    return comments[0] || { count: 0, rating: 0 };
+
+    if (result.length === 0) {
+      return { count: 0, rating: 0 };
+    }
+
+    return {
+      count: result[0].count,
+      rating: parseFloat(result[0].rating.toFixed(1)),
+    };
   }
 
   async countAndRatingByOfferIds(
     offerIds: string[],
   ): Promise<Record<string, { count: number; rating: number }>> {
-    const comments = await this.model.aggregate([
-      { $match: { offerId: { $in: offerIds } } },
+    const result = await this.model.aggregate([
+      {
+        $match: {
+          offer: { $in: offerIds.map((id) => new Types.ObjectId(id)) },
+        },
+      },
       {
         $group: {
-          _id: "$offerId",
+          _id: "$offer",
           count: { $sum: 1 },
-          rating: { $avg: "$rating" },
+          totalRating: { $sum: "$rating" },
+        },
+      },
+      {
+        $project: {
+          offerId: { $toString: "$_id" },
+          count: 1,
+          rating: { $divide: ["$totalRating", "$count"] },
+          _id: 0,
         },
       },
     ]);
 
     return offerIds.reduce(
       (acc, offerId) => {
-        const comment = comments.find((com) => com._id === offerId);
+        const comment = result.find((com) => com.offerId === offerId);
         acc[offerId] = {
           count: comment?.count || 0,
           rating: comment?.rating || 0,

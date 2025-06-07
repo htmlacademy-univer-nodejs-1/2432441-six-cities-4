@@ -4,7 +4,7 @@ import { Types } from "mongoose";
 import { ApiError } from "../errors/api-error.js";
 import { Middleware } from "./interface.js";
 
-export class ObjectIdParamValidator implements Middleware {
+export class ObjectIdValidator implements Middleware {
   constructor(private paramName: string) {}
 
   public handle(req: Request, _res: Response, next: NextFunction): void {

@@ -1,10 +1,11 @@
 import got from "got";
 import random from "random";
 
-import { TestData } from "./testData.js";
+import { Ref } from "@typegoose/typegoose";
+import { Types } from "mongoose";
 import { Amenity, City, HousingType, Offer } from "../models/offer.js";
 import { User } from "../models/user.js";
-import { Ref } from "@typegoose/typegoose";
+import { TestData } from "./testData.js";
 
 export class Generator {
   private data: TestData | undefined;
@@ -23,6 +24,7 @@ export class Generator {
     if (this.data === undefined) throw Error("you must load the data first");
 
     return {
+      _id: new Types.ObjectId().toString(),
       title: random.choice(this.data.title)!,
       description: random.choice(this.data.description)!,
       publicationDate: random.choice(this.data.publicationDate)!,

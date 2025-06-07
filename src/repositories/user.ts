@@ -55,25 +55,19 @@ export class UserRepository {
   }
 
   public async isFavorite(userId: string, offerId: string): Promise<boolean> {
-    const user = await this.model.findById(userId).exec();
-    return (
-      user?.favorites?.some(
-        (favorite) => (favorite as Offer)._id === offerId,
-      ) ?? false
-    );
+    const favorites = await this.getFavorites(userId);
+    return favorites.some((favorite) => favorite._id === offerId) ?? false;
   }
 
   public async areFavorites(
     userId: string,
     offerIds: string[],
   ): Promise<Record<string, boolean>> {
-    const user = await this.model.findById(userId).exec();
+    const favorites = await this.getFavorites(userId);
     return offerIds.reduce(
       (acc, offerId) => {
         acc[offerId] =
-          user?.favorites?.some(
-            (favorite) => (favorite as Offer)._id === offerId,
-          ) ?? false;
+          favorites.some((offer) => offer._id === offerId) ?? false;
         return acc;
       },
       {} as Record<string, boolean>,

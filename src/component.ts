@@ -12,6 +12,7 @@ export const Component = {
   UserController: Symbol.for("UserController"),
   FavouriteController: Symbol.for("FavouriteController"),
   CommentController: Symbol.for("CommentController"),
+  MiddlewareFactory: Symbol.for("MiddlewareFactory"),
   OfferService: Symbol.for("OfferService"),
   UserService: Symbol.for("UserService"),
   CommentService: Symbol.for("CommentService"),

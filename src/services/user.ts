@@ -1,11 +1,11 @@
 import bcrypt from "bcrypt";
 import { StatusCodes } from "http-status-codes";
 import { inject, injectable } from "inversify";
-import jwt from "jsonwebtoken";
 import pino from "pino";
 import { ApiError } from "../app/errors/api-error.js";
 import { Component } from "../component.js";
 import { ConfigProvider } from "../config/provider.js";
+import { encodeToken } from "../helpers/jwt.js";
 import { UserType } from "../models/user.js";
 import { UserRepository } from "../repositories/user.js";
 import { convertUserToSchema } from "../schema/convert.js";
@@ -76,11 +76,8 @@ export class UserService {
       throw new ApiError(StatusCodes.BAD_REQUEST, "Invalid password");
     }
 
-    const token = jwt.sign(
-      { id: user._id, email: user.email },
-      this.configProvider.get().JWT_SECRET,
-      { expiresIn: "1d" },
-    );
+    const secret = this.configProvider.get().JWT_SECRET;
+    const token = encodeToken(secret, { id: user._id });
 
     this.log.info(`User logged in: ${user._id}`);
 

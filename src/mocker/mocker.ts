@@ -1,7 +1,8 @@
+import { Ref } from "@typegoose/typegoose";
+import { Types } from "mongoose";
 import fs from "node:fs";
 import readline from "node:readline";
-import { Offer, City, HousingType, Amenity } from "../models/offer.js";
-import { Ref } from "@typegoose/typegoose";
+import { Amenity, City, HousingType, Offer } from "../models/offer.js";
 import { User } from "../models/user.js";
 
 export class Mocker {
@@ -36,6 +37,7 @@ export class Mocker {
       ] = line.split("\t");
 
       yield {
+        _id: new Types.ObjectId().toString(),
         title,
         description,
         publicationDate: new Date(publicationDate),
