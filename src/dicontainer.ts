@@ -16,6 +16,7 @@ import { CommentRepository } from "./repositories/comment.js";
 import { ExceptionFilter } from "./app/middlewares/exception-filter.js";
 import { FavouriteController } from "./app/controllers/favourite.js";
 import { UserService } from "./services/user.js";
+import { CommentController } from "./app/controllers/comment.js";
 
 export class DIContainer {
   private container: Container;
@@ -109,6 +110,10 @@ export class DIContainer {
     this.container
       .bind(Component.FavouriteController)
       .to(FavouriteController)
+      .inSingletonScope();
+    this.container
+      .bind(Component.CommentController)
+      .to(CommentController)
       .inSingletonScope();
   }
 

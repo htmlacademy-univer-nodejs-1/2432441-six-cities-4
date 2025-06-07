@@ -1,10 +1,11 @@
-import { Request, Response, Router } from "express";
+import { Request, Response } from "express";
 import { inject, injectable } from "inversify";
-import { BaseController } from "./base.js";
-import asyncHandler from "express-async-handler";
 import { Logger } from "pino";
 import { Component } from "../../component.js";
 import { UserService } from "../../services/user.js";
+import { RequestValidator } from "../middlewares/request-validator.js";
+import { CreateUserRequestSchema } from "../validators/user.js";
+import { BaseController } from "./base.js";
 
 @injectable()
 export class UserController extends BaseController {
@@ -13,20 +14,17 @@ export class UserController extends BaseController {
     @inject(Component.UserService) private readonly userService: UserService,
   ) {
     super(logger);
-  }
 
-  public getRouter(): Router {
-    const router = Router();
-
-    router.post("/", asyncHandler(this.create.bind(this)));
-    router.post("/login", asyncHandler(this.login.bind(this)));
-    router.get("/check", asyncHandler(this.checkAuth.bind(this)));
-
-    return router;
+    this.addPost(
+      "/",
+      this.create,
+      new RequestValidator(CreateUserRequestSchema),
+    );
+    this.addPost("/login", this.login);
+    this.addGet("/check", this.get);
   }
 
   private async create(req: Request, res: Response): Promise<void> {
-    this.logger.info(req.body);
     const user = await this.userService.createUser(req.body);
     this.created(res, user);
   }
@@ -36,7 +34,7 @@ export class UserController extends BaseController {
     this.ok(res, loginResponse);
   }
 
-  private async checkAuth(_: Request, res: Response): Promise<void> {
+  private async get(_: Request, res: Response): Promise<void> {
     // const user = await this.userService.getUser(req.user.id);
     this.ok(res, {});
   }

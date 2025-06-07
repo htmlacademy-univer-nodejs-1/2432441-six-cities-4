@@ -4,12 +4,13 @@ import { inject, injectable } from "inversify";
 import { Logger } from "pino";
 import { ApiError } from "../errors/api-error.js";
 import { Component } from "../../component.js";
+import { Middleware } from "./interface.js";
 
 @injectable()
-export class ExceptionFilter {
+export class ExceptionFilter implements Middleware {
   constructor(@inject(Component.Log) private readonly logger: Logger) {}
 
-  public catch(
+  public handle(
     err: Error | ApiError,
     _req: Request,
     res: Response,

@@ -1,10 +1,15 @@
-import { Request, Response, Router } from "express";
+import { Request, Response } from "express";
 import { inject, injectable } from "inversify";
-import { BaseController } from "./base.js";
-import asyncHandler from "express-async-handler";
 import { Logger } from "pino";
 import { Component } from "../../component.js";
 import { OfferService } from "../../services/offer.js";
+import { ObjectIdParamValidator } from "../middlewares/objectid-validator.js";
+import { RequestValidator } from "../middlewares/request-validator.js";
+import {
+  CreateOfferRequestSchema,
+  UpdateOfferRequestSchema,
+} from "../validators/offer.js";
+import { BaseController } from "./base.js";
 
 @injectable()
 export class OfferController extends BaseController {
@@ -13,19 +18,24 @@ export class OfferController extends BaseController {
     @inject(Component.OfferService) private readonly offerService: OfferService,
   ) {
     super(logger);
-  }
 
-  public getRouter(): Router {
-    const router = Router();
+    const offerIdValidator = new ObjectIdParamValidator("offerId");
 
-    router.get("/", asyncHandler(this.list.bind(this)));
-    router.post("/", asyncHandler(this.create.bind(this)));
-    router.get("/:id", asyncHandler(this.get.bind(this)));
-    router.patch("/:id", asyncHandler(this.update.bind(this)));
-    router.delete("/:id", asyncHandler(this.delete.bind(this)));
-    router.get("/premium/:city", asyncHandler(this.premium.bind(this)));
-
-    return router;
+    this.addGet("/", this.list);
+    this.addPost(
+      "/",
+      this.create,
+      new RequestValidator(CreateOfferRequestSchema),
+    );
+    this.addGet("/:offerId", this.get, offerIdValidator);
+    this.addPatch(
+      "/:offerId",
+      this.update,
+      offerIdValidator,
+      new RequestValidator(UpdateOfferRequestSchema),
+    );
+    this.addDelete("/:offerId", this.delete, offerIdValidator);
+    this.addGet("/premium/:city", this.premium);
   }
 
   private async list(req: Request, res: Response): Promise<void> {
@@ -33,7 +43,6 @@ export class OfferController extends BaseController {
     const skip = parseInt(req.query.skip as string, 10) || 0;
 
     const offers = await this.offerService.getOffers(undefined, limit, skip);
-    this.logger.info("??");
     this.ok(res, offers);
   }
 
@@ -46,19 +55,19 @@ export class OfferController extends BaseController {
   }
 
   private async get(req: Request, res: Response): Promise<void> {
-    const id = req.params["id"];
+    const id = req.params["offerId"];
     const offers = await this.offerService.getOffer(undefined, id);
     this.ok(res, offers);
   }
 
   private async update(req: Request, res: Response): Promise<void> {
-    const id = req.params["id"];
+    const id = req.params["offerId"];
     const offer = await this.offerService.updateOffer(id, req.body);
     this.ok(res, offer);
   }
 
   private async delete(req: Request, res: Response): Promise<void> {
-    const id = req.params["id"];
+    const id = req.params["offerId"];
     await this.offerService.deleteOffer(id);
     this.noContent(res);
   }

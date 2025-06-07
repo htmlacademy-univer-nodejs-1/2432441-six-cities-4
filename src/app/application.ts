@@ -8,6 +8,7 @@ import { OfferController } from "./controllers/offer.js";
 import { UserController } from "./controllers/user.js";
 import { FavouriteController } from "./controllers/favourite.js";
 import cors from "cors";
+import { CommentController } from "./controllers/comment.js";
 
 @injectable()
 export class Application {
@@ -25,6 +26,8 @@ export class Application {
     private readonly userController: UserController,
     @inject(Component.FavouriteController)
     private readonly favouriteController: FavouriteController,
+    @inject(Component.CommentController)
+    private readonly commentController: CommentController,
   ) {
     this.express = express();
   }
@@ -35,13 +38,17 @@ export class Application {
   }
 
   public useControllers() {
-    this.express.use("/offers", this.offerController.getRouter());
-    this.express.use("/users", this.userController.getRouter());
-    this.express.use("/users/favorites", this.favouriteController.getRouter());
+    this.express.use("/offers", this.offerController.router);
+    this.express.use("/users", this.userController.router);
+    this.express.use("/users/favorites", this.favouriteController.router);
+    this.express.use(
+      "/offers/:offerId/comments",
+      this.commentController.router,
+    );
   }
 
   public usePostMiddlewares() {
-    this.express.use(this.exceptionFilter.catch.bind(this.exceptionFilter));
+    this.express.use(this.exceptionFilter.handle.bind(this.exceptionFilter));
   }
 
   public init() {
