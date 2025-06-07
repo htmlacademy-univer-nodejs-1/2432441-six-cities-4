@@ -1,10 +1,10 @@
-import { inject, injectable } from "inversify";
-import { User } from "../models/user.js";
-import { Model, Types } from "mongoose";
-import { Offer } from "../models/offer.js";
 import { getModelForClass } from "@typegoose/typegoose";
-import { Database } from "../database/database.js";
+import { inject, injectable } from "inversify";
+import { Model, Types } from "mongoose";
 import { Component } from "../component.js";
+import { Database } from "../database/database.js";
+import { Offer } from "../models/offer.js";
+import { User } from "../models/user.js";
 
 @injectable()
 export class UserRepository {

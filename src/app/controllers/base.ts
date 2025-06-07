@@ -1,18 +1,66 @@
-import { Response, Router } from "express";
+import { RequestHandler, Response, Router } from "express";
+import asyncHandler from "express-async-handler";
 import { StatusCodes } from "http-status-codes";
-import { inject, injectable } from "inversify";
+import { inject } from "inversify";
 import { Component } from "../../component.js";
 import { Logger } from "pino";
+import { Middleware } from "../middlewares/interface.js";
 
-@injectable()
 export abstract class BaseController {
-  protected logger: Logger;
+  public readonly router: Router = Router();
+  protected readonly logger: Logger;
 
   constructor(@inject(Component.Log) logger: Logger) {
     this.logger = logger;
   }
 
-  public abstract getRouter(): Router;
+  protected addGet(
+    path: string,
+    handler: RequestHandler,
+    ...middlewares: Middleware[]
+  ) {
+    this.router.get(
+      path,
+      ...middlewares.map((m) => m.handle.bind(m)),
+      asyncHandler(handler.bind(this)),
+    );
+  }
+
+  protected addPost(
+    path: string,
+    handler: RequestHandler,
+    ...middlewares: Middleware[]
+  ) {
+    this.router.post(
+      path,
+      ...middlewares.map((m) => m.handle.bind(m)),
+      asyncHandler(handler.bind(this)),
+    );
+  }
+
+  protected addPatch(
+    path: string,
+    handler: RequestHandler,
+    ...middlewares: Middleware[]
+  ) {
+    this.router.patch(
+      path,
+      ...middlewares.map((m) => m.handle.bind(m)),
+      asyncHandler(handler.bind(this)),
+    );
+  }
+
+  protected addDelete(
+    path: string,
+    handler: RequestHandler,
+    ...middlewares: Middleware[]
+  ) {
+    this.router.delete(
+      path,
+      ...middlewares.map((m) => m.handle.bind(m)),
+      asyncHandler(handler.bind(this)),
+    );
+  }
 
   protected send<T>(res: Response, statusCode: number, data: T): void {
     res.status(statusCode).json(data);
@@ -28,21 +76,5 @@ export abstract class BaseController {
 
   protected noContent(res: Response): void {
     res.status(StatusCodes.NO_CONTENT).send();
-  }
-
-  protected badRequest<T>(res: Response, data: T): void {
-    this.send(res, StatusCodes.BAD_REQUEST, data);
-  }
-
-  protected unauthorized<T>(res: Response, data: T): void {
-    this.send(res, StatusCodes.UNAUTHORIZED, data);
-  }
-
-  protected forbidden<T>(res: Response, data: T): void {
-    this.send(res, StatusCodes.FORBIDDEN, data);
-  }
-
-  protected notFound<T>(res: Response, data: T): void {
-    this.send(res, StatusCodes.NOT_FOUND, data);
   }
 }

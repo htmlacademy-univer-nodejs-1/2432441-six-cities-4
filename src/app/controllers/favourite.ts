@@ -1,9 +1,9 @@
-import { Request, Response, Router } from "express";
+import { Request, Response } from "express";
 import { inject, injectable } from "inversify";
 import { BaseController } from "./base.js";
-import asyncHandler from "express-async-handler";
 import { Logger } from "pino";
 import { Component } from "../../component.js";
+import { ObjectIdParamValidator } from "../middlewares/objectid-validator.js";
 
 @injectable()
 export class FavouriteController extends BaseController {
@@ -14,19 +14,14 @@ export class FavouriteController extends BaseController {
     // @inject(Component.OfferService) private readonly offerService: OfferService,
   ) {
     super(logger);
+
+    const offerIdValidator = new ObjectIdParamValidator("offerId");
+    this.addGet("/", this.list);
+    this.addPost("/:offerId", this.create, offerIdValidator);
+    this.addGet("/:offerId", this.remove, offerIdValidator);
   }
 
-  public getRouter(): Router {
-    const router = Router();
-
-    router.get("/", asyncHandler(this.get.bind(this)));
-    router.post("/:offerId", asyncHandler(this.create.bind(this)));
-    router.get("/:offerId", asyncHandler(this.remove.bind(this)));
-
-    return router;
-  }
-
-  private async get(_: Request, res: Response): Promise<void> {
+  private async list(_: Request, res: Response): Promise<void> {
     // const response = await this.favouriteService.getFavorites(req.user.id);
     this.ok(res, {});
   }
