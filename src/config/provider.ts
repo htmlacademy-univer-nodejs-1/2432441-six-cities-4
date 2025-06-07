@@ -1,8 +1,8 @@
 import dotenv from "dotenv";
-import pino from "pino";
-import schema from "./schema.js";
 import { inject, injectable } from "inversify";
+import pino from "pino";
 import { Component } from "../component.js";
+import schema from "./schema.js";
 import { Config } from "./types.js";
 
 @injectable()

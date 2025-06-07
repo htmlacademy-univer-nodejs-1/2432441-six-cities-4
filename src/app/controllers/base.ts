@@ -2,8 +2,8 @@ import { RequestHandler, Response, Router } from "express";
 import asyncHandler from "express-async-handler";
 import { StatusCodes } from "http-status-codes";
 import { inject } from "inversify";
-import { Component } from "../../component.js";
 import { Logger } from "pino";
+import { Component } from "../../component.js";
 import { Middleware } from "../middlewares/interface.js";
 
 export abstract class BaseController {

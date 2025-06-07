@@ -3,6 +3,8 @@ import { inject, injectable } from "inversify";
 import { Logger } from "pino";
 import { Component } from "../../component.js";
 import { CommentService } from "../../services/comment.js";
+import { OfferService } from "../../services/offer.js";
+import { ObjectExistsValidator } from "../middlewares/object-exists-validator.js";
 import { ObjectIdParamValidator } from "../middlewares/objectid-validator.js";
 import { RequestValidator } from "../middlewares/request-validator.js";
 import { CreateCommentRequestSchema } from "../validators/comment.js";
@@ -14,16 +16,24 @@ export class CommentController extends BaseController {
     @inject(Component.Log) logger: Logger,
     @inject(Component.CommentService)
     private readonly commentService: CommentService,
+    @inject(Component.OfferService) private readonly offerService: OfferService,
   ) {
     super(logger);
 
-    const offerIdValidator = new ObjectIdParamValidator("offerId");
-    this.addGet("/", this.list, offerIdValidator);
+    const offerIdParamName = "offerId";
+    const offerIdValidator = new ObjectIdParamValidator(offerIdParamName);
+    const offerExistsValidator = new ObjectExistsValidator(
+      offerIdParamName,
+      (id) => this.offerService.getOffer(undefined, id),
+    );
+
+    this.addGet("/", this.list, offerIdValidator, offerExistsValidator);
     this.addPost(
       "/",
       this.create,
       offerIdValidator,
       new RequestValidator(CreateCommentRequestSchema),
+      offerExistsValidator,
     );
   }
 
