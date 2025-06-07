@@ -1,22 +1,21 @@
 import { Container } from "inversify";
 import { pino } from "pino";
-import { ConfigProvider } from "./config/provider.js";
-import { Component } from "./component.js";
 import { Application } from "./app/application.js";
-import { Importer } from "./importer/importer.js";
-import { Database } from "./database/database.js";
-import { OfferRepository } from "./repositories/offer.js";
-import { UserRepository } from "./repositories/user.js";
+import { CommentController } from "./app/controllers/comment.js";
+import { FavouriteController } from "./app/controllers/favourite.js";
 import { OfferController } from "./app/controllers/offer.js";
 import { UserController } from "./app/controllers/user.js";
-import { OfferService } from "./services/offer.js";
+import { Component } from "./component.js";
+import { ConfigProvider } from "./config/provider.js";
+import { Database } from "./database/database.js";
+import { Importer } from "./importer/importer.js";
+import { CommentRepository } from "./repositories/comment.js";
+import { OfferRepository } from "./repositories/offer.js";
+import { UserRepository } from "./repositories/user.js";
 import { CommentService } from "./services/comment.js";
 import { FavouriteService } from "./services/favourite.js";
-import { CommentRepository } from "./repositories/comment.js";
-import { ExceptionFilter } from "./app/middlewares/exception-filter.js";
-import { FavouriteController } from "./app/controllers/favourite.js";
+import { OfferService } from "./services/offer.js";
 import { UserService } from "./services/user.js";
-import { CommentController } from "./app/controllers/comment.js";
 
 export class DIContainer {
   private container: Container;
@@ -54,7 +53,6 @@ export class DIContainer {
       .inSingletonScope();
 
     this.configureControllers();
-    this.configureMiddlewares();
     this.configureRepositories();
     this.configureServices();
 
@@ -114,13 +112,6 @@ export class DIContainer {
     this.container
       .bind(Component.CommentController)
       .to(CommentController)
-      .inSingletonScope();
-  }
-
-  private configureMiddlewares() {
-    this.container
-      .bind(Component.ExceptionFilter)
-      .to(ExceptionFilter)
       .inSingletonScope();
   }
 }

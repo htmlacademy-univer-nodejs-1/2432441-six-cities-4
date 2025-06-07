@@ -1,18 +1,20 @@
-import { Component } from "../component.js";
-import { UserRepository } from "../repositories/user.js";
-import pino from "pino";
+import bcrypt from "bcrypt";
+import { StatusCodes } from "http-status-codes";
 import { inject, injectable } from "inversify";
-import { User, UserType } from "../models/user.js";
+import jwt from "jsonwebtoken";
+import pino from "pino";
+import { ApiError } from "../app/errors/api-error.js";
+import { Component } from "../component.js";
+import { ConfigProvider } from "../config/provider.js";
+import { UserType } from "../models/user.js";
+import { UserRepository } from "../repositories/user.js";
+import { convertUserToSchema } from "../schema/convert.js";
 import {
   CreateUserRequest,
   LoginRequest,
   LoginResponse,
+  User as SchemaUser,
 } from "../schema/schema.js";
-import bcrypt from "bcrypt";
-import { ConfigProvider } from "../config/provider.js";
-import jwt from "jsonwebtoken";
-import { ApiError as ApiError } from "../app/errors/api-error.js";
-import { StatusCodes } from "http-status-codes";
 
 @injectable()
 export class UserService {
@@ -30,15 +32,15 @@ export class UserService {
     this.configProvider = configProvider;
   }
 
-  public async getUser(id: string): Promise<User> {
+  public async getUser(id: string): Promise<SchemaUser> {
     const user = await this.userRepository.findById(id);
     if (!user) {
-      throw new Error("User not found");
+      throw new ApiError(StatusCodes.NOT_FOUND, "User not found");
     }
-    return user;
+    return convertUserToSchema(user);
   }
 
-  public async createUser(request: CreateUserRequest): Promise<User> {
+  public async createUser(request: CreateUserRequest): Promise<SchemaUser> {
     const existingUser = await this.userRepository.findByEmail(request.email);
     if (existingUser) {
       throw new ApiError(
@@ -57,7 +59,7 @@ export class UserService {
 
     this.log.info(`User created: ${user._id}`);
 
-    return user;
+    return convertUserToSchema(user);
   }
 
   public async login(request: LoginRequest): Promise<LoginResponse> {
@@ -83,5 +85,10 @@ export class UserService {
     this.log.info(`User logged in: ${user._id}`);
 
     return { token };
+  }
+
+  public async updateAvatar(userId: string, name: string): Promise<void> {
+    this.log.info(`new avatar ${name} for user ${userId}`);
+    await this.userRepository.update(userId, { avatar: `/uploads/${name}` });
   }
 }

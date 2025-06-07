@@ -23,4 +23,10 @@ export default convict<Config>({
     env: "JWT_SECRET",
     default: null,
   },
+  UPLOAD_DIR: {
+    doc: "Directory for uploaded files",
+    format: String,
+    env: "UPLOAD_DIR",
+    default: "./uploads",
+  },
 });

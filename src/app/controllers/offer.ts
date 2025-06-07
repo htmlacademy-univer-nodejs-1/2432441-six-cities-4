@@ -3,6 +3,7 @@ import { inject, injectable } from "inversify";
 import { Logger } from "pino";
 import { Component } from "../../component.js";
 import { OfferService } from "../../services/offer.js";
+import { ObjectExistsValidator } from "../middlewares/object-exists-validator.js";
 import { ObjectIdParamValidator } from "../middlewares/objectid-validator.js";
 import { RequestValidator } from "../middlewares/request-validator.js";
 import {
@@ -19,7 +20,12 @@ export class OfferController extends BaseController {
   ) {
     super(logger);
 
-    const offerIdValidator = new ObjectIdParamValidator("offerId");
+    const offerIdParamName = "offerId";
+    const offerIdValidator = new ObjectIdParamValidator(offerIdParamName);
+    const offerExistsValidator = new ObjectExistsValidator(
+      offerIdParamName,
+      (id) => this.offerService.getOffer(undefined, id),
+    );
 
     this.addGet("/", this.list);
     this.addPost(
@@ -27,14 +33,19 @@ export class OfferController extends BaseController {
       this.create,
       new RequestValidator(CreateOfferRequestSchema),
     );
-    this.addGet("/:offerId", this.get, offerIdValidator);
+    this.addGet("/:offerId", this.get, offerIdValidator, offerExistsValidator);
     this.addPatch(
       "/:offerId",
       this.update,
       offerIdValidator,
       new RequestValidator(UpdateOfferRequestSchema),
     );
-    this.addDelete("/:offerId", this.delete, offerIdValidator);
+    this.addDelete(
+      "/:offerId",
+      this.delete,
+      offerIdValidator,
+      offerExistsValidator,
+    );
     this.addGet("/premium/:city", this.premium);
   }
 

@@ -29,6 +29,10 @@ export class UserRepository {
     return user.save();
   }
 
+  public async update(id: string, data: Partial<User>): Promise<User | null> {
+    return this.model.findByIdAndUpdate(id, data, { new: true }).exec();
+  }
+
   public async addFavorite(userId: string, offerId: string): Promise<void> {
     await this.model
       .findByIdAndUpdate(userId, {

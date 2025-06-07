@@ -1,14 +1,11 @@
 import { NextFunction, Request, Response } from "express";
 import { StatusCodes } from "http-status-codes";
-import { inject, injectable } from "inversify";
 import { Logger } from "pino";
 import { ApiError } from "../errors/api-error.js";
-import { Component } from "../../component.js";
 import { Middleware } from "./interface.js";
 
-@injectable()
 export class ExceptionFilter implements Middleware {
-  constructor(@inject(Component.Log) private readonly logger: Logger) {}
+  constructor(private readonly logger: Logger) {}
 
   public handle(
     err: Error | ApiError,

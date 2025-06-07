@@ -799,6 +799,33 @@ paths:
               schema:
                 $ref: "#/components/schemas/Error"
 
+  /users/avatar:
+    post:
+      tags:
+        - Users
+      summary: Upload user avatar
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                avatar:
+                  type: string
+                  format: binary
+      responses:
+        "204":
+          description: Avatar uploaded successfully
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
   /offers/premium/{city}:
     parameters:
       - name: city
