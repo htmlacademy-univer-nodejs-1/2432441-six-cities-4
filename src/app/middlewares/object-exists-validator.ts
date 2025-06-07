@@ -1,12 +1,12 @@
 import { NextFunction, Request, Response } from "express";
 import { Middleware } from "./interface.js";
 
-type GetByIdAsync<T> = (id: string) => Promise<T>;
+export type GetByIdFunc<T> = (id: string) => Promise<T>;
 
 export class ObjectExistsValidator<T> implements Middleware {
   constructor(
     private paramName: string,
-    private getFunc: GetByIdAsync<T>,
+    private getFunc: GetByIdFunc<T>,
   ) {}
 
   public async handle(req: Request, _res: Response, next: NextFunction) {

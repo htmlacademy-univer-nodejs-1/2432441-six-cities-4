@@ -6,8 +6,7 @@ import { Component } from "../../component.js";
 import { ConfigProvider } from "../../config/provider.js";
 import { UserService } from "../../services/user.js";
 import { ApiError } from "../errors/api-error.js";
-import { FileUploader } from "../middlewares/file-uploader.js";
-import { RequestValidator } from "../middlewares/request-validator.js";
+import { MiddlewareFactory } from "../middlewares/factory.js";
 import { CreateUserRequestSchema } from "../validators/user.js";
 import { BaseController } from "./base.js";
 
@@ -16,21 +15,25 @@ export class UserController extends BaseController {
   constructor(
     @inject(Component.Log) logger: Logger,
     @inject(Component.ConfigProvider) configProvider: ConfigProvider,
+    @inject(Component.MiddlewareFactory) middlewareFactory: MiddlewareFactory,
     @inject(Component.UserService) private readonly userService: UserService,
   ) {
     super(logger);
 
+    const mustAuthMiddleware = middlewareFactory.userAuthenticator();
+
     this.addPost(
       "/",
       this.create,
-      new RequestValidator(CreateUserRequestSchema),
+      middlewareFactory.requestValidator(CreateUserRequestSchema),
     );
     this.addPost("/login", this.login);
-    this.addGet("/check", this.get);
+    this.addGet("/check", this.get, mustAuthMiddleware);
     this.addPost(
       "/avatar",
       this.updateAvatar,
-      new FileUploader(
+      mustAuthMiddleware,
+      middlewareFactory.fileUploader(
         "avatar",
         configProvider.get().UPLOAD_DIR,
         ["image/png", "image/jpeg"],
@@ -49,8 +52,8 @@ export class UserController extends BaseController {
     this.ok(res, response);
   }
 
-  private async get(_: Request, res: Response): Promise<void> {
-    const user = await this.userService.getUser("684497a2bfbb7cf605055bdd");
+  private async get(req: Request, res: Response): Promise<void> {
+    const user = await this.userService.getUser(req.user!._id);
     this.ok(res, user);
   }
 
@@ -59,10 +62,7 @@ export class UserController extends BaseController {
     if (!file)
       throw new ApiError(StatusCodes.BAD_REQUEST, "invalide file provided");
 
-    await this.userService.updateAvatar(
-      "684497a2bfbb7cf605055bdd",
-      file.filename,
-    );
+    await this.userService.updateAvatar(req.user!._id, file.filename);
     this.noContent(res);
   }
 }

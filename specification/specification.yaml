@@ -504,6 +504,8 @@ paths:
       tags:
         - Offers
       summary: Get list of rental offers
+      security:
+        - bearerAuth: []
       description: Returns a list of rental offers with pagination
       parameters:
         - name: limit
@@ -571,6 +573,8 @@ paths:
       tags:
         - Offers
       summary: Get offer details
+      security:
+        - bearerAuth: []
       responses:
         "200":
           description: Offer details
@@ -854,6 +858,8 @@ paths:
       tags:
         - Offers
       summary: Get premium offers for city
+      security:
+        - bearerAuth: []
       description: Returns up to 3 premium offers for the specified city
       responses:
         "200":

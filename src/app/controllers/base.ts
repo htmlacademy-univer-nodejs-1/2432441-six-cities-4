@@ -7,7 +7,7 @@ import { Component } from "../../component.js";
 import { Middleware } from "../middlewares/interface.js";
 
 export abstract class BaseController {
-  public readonly router: Router = Router();
+  public readonly router: Router = Router({ mergeParams: true });
   protected readonly logger: Logger;
 
   constructor(@inject(Component.Log) logger: Logger) {

@@ -1,23 +1,24 @@
+import { StatusCodes } from "http-status-codes";
 import { inject, injectable } from "inversify";
+import pino from "pino";
+import { ApiError } from "../app/errors/api-error.js";
+import { Component } from "../component.js";
+import {
+  Amenity,
+  City,
+  HousingType,
+  Offer as OfferModel,
+} from "../models/offer.js";
+import { User as UserModel } from "../models/user.js";
+import { CommentRepository } from "../repositories/comment.js";
+import { OfferRepository } from "../repositories/offer.js";
+import { UserRepository } from "../repositories/user.js";
+import { convertOfferToSchema } from "../schema/convert.js";
 import {
   CreateOfferRequest,
   Offer,
   UpdateOfferRequest,
 } from "../schema/schema.js";
-import { Component } from "../component.js";
-import pino from "pino";
-import { OfferRepository } from "../repositories/offer.js";
-import { UserRepository } from "../repositories/user.js";
-import { CommentRepository } from "../repositories/comment.js";
-import { convertOfferToSchema } from "../schema/convert.js";
-import {
-  Offer as OfferModel,
-  Amenity,
-  City,
-  HousingType,
-} from "../models/offer.js";
-import { ApiError } from "../app/errors/api-error.js";
-import { StatusCodes } from "http-status-codes";
 
 @injectable()
 export class OfferService {
@@ -86,9 +87,15 @@ export class OfferService {
   }
 
   public async updateOffer(
+    userId: string,
     id: string,
     request: UpdateOfferRequest,
   ): Promise<Offer> {
+    const offer = await this.offerRepository.findById(id);
+    if (!offer || (offer.author as UserModel)._id !== userId) {
+      throw new ApiError(StatusCodes.FORBIDDEN, "You can't edit this offer!");
+    }
+
     const updatedOffer = await this.offerRepository.update(id, {
       ...request,
       city: request.city as City,
@@ -110,18 +117,24 @@ export class OfferService {
 
     this.log.info(`Offer updated: ${updatedOffer._id}`);
 
+    const isFavourite = await this.userRepository.isFavorite(userId, id);
     const { rating, count } =
-      await this.commentRepository.countAndRatingByOfferId(updatedOffer._id!);
-
-    return convertOfferToSchema(updatedOffer, false, rating, count);
+      await this.commentRepository.countAndRatingByOfferId(updatedOffer._id);
+    return convertOfferToSchema(updatedOffer, isFavourite, rating, count);
   }
 
-  public async deleteOffer(id: string): Promise<void> {
+  public async deleteOffer(userId: string, id: string): Promise<void> {
+    const offer = await this.offerRepository.findById(id);
+    if (!offer || (offer.author as UserModel)._id !== userId) {
+      throw new ApiError(StatusCodes.FORBIDDEN, "You can't delete this offer!");
+    }
+
     await this.offerRepository.delete(id);
     this.log.info(`Offer deleted: ${id}`);
   }
 
   public async getPremiumOffers(
+    userId: string | undefined,
     city: string,
     limit: number,
     skip: number,
@@ -131,27 +144,25 @@ export class OfferService {
       limit,
       skip,
     );
-    return this.enrichOffers(offers);
+    return this.enrichOffers(offers, userId);
   }
 
-  private async enrichOffer(
-    offer: OfferModel,
-    userId?: string,
-  ): Promise<Offer> {
+  public async enrichOffer(offer: OfferModel, userId?: string): Promise<Offer> {
     const isFavorite = userId
-      ? await this.userRepository.isFavorite(userId, offer._id!)
+      ? await this.userRepository.isFavorite(userId, offer._id)
       : false;
+
     const { rating, count } =
-      await this.commentRepository.countAndRatingByOfferId(offer._id!);
+      await this.commentRepository.countAndRatingByOfferId(offer._id);
 
     return convertOfferToSchema(offer, isFavorite, rating, count);
   }
 
-  private async enrichOffers(
+  public async enrichOffers(
     offers: OfferModel[],
     userId?: string,
   ): Promise<Offer[]> {
-    const offerIds = offers.map((offer) => offer._id!);
+    const offerIds = offers.map((offer) => offer._id);
     const favourites = userId
       ? await this.userRepository.areFavorites(userId, offerIds)
       : {};
@@ -161,9 +172,9 @@ export class OfferService {
     return offers.map((offer) =>
       convertOfferToSchema(
         offer,
-        favourites[offer._id!],
-        commentsCount[offer._id!].rating,
-        commentsCount[offer._id!].count,
+        favourites[offer._id],
+        commentsCount[offer._id].rating,
+        commentsCount[offer._id].count,
       ),
     );
   }

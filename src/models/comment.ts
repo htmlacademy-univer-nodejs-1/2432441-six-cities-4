@@ -1,7 +1,7 @@
 import { prop, Ref } from "@typegoose/typegoose";
 import { BaseModel } from "./base.js";
-import { User } from "./user.js";
 import { Offer } from "./offer.js";
+import { User } from "./user.js";
 
 export class Comment extends BaseModel {
   @prop({ required: true, minlength: 5, maxlength: 1024 })

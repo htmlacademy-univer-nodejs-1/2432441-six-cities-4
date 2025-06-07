@@ -1,7 +1,7 @@
 import { prop, Ref } from "@typegoose/typegoose";
 import { BaseModel } from "./base.js";
-import { User } from "./user.js";
 import { Comment } from "./comment.js";
+import { User } from "./user.js";
 
 export enum City {
   Paris = "Paris",

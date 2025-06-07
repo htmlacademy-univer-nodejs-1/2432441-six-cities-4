@@ -2,60 +2,60 @@ import { Request, Response } from "express";
 import { inject, injectable } from "inversify";
 import { Logger } from "pino";
 import { Component } from "../../component.js";
-import { OfferService } from "../../services/offer.js";
-import { ObjectExistsValidator } from "../middlewares/object-exists-validator.js";
-import { ObjectIdParamValidator } from "../middlewares/objectid-validator.js";
+import { FavouriteService } from "../../services/favourite.js";
+import { MiddlewareFactory } from "../middlewares/factory.js";
 import { BaseController } from "./base.js";
 
 @injectable()
 export class FavouriteController extends BaseController {
   constructor(
     @inject(Component.Log) logger: Logger,
-    // @inject(Component.FavouriteService)
-    // private readonly favouriteService: FavouriteService,
-    @inject(Component.OfferService) private readonly offerService: OfferService,
+    @inject(Component.MiddlewareFactory) middlewareFactory: MiddlewareFactory,
+    @inject(Component.FavouriteService)
+    private readonly favouriteService: FavouriteService,
   ) {
     super(logger);
 
-    const offerIdParamName = "offerId";
-    const offerIdValidator = new ObjectIdParamValidator(offerIdParamName);
-    const offerExistsValidator = new ObjectExistsValidator(
-      offerIdParamName,
-      (id) => this.offerService.getOffer(undefined, id),
-    );
+    const offerIdValidator = middlewareFactory.objectIdValidator("offerId");
+    const offerExistsValidator = middlewareFactory.offerExistsValidator();
 
-    this.addGet("/", this.list);
+    const mustAuthMiddleware = middlewareFactory.userAuthenticator();
+
+    this.addGet("/", this.list, mustAuthMiddleware);
     this.addPost(
       "/:offerId",
       this.create,
       offerIdValidator,
+      mustAuthMiddleware,
       offerExistsValidator,
     );
-    this.addGet(
+    this.addDelete(
       "/:offerId",
       this.remove,
       offerIdValidator,
+      mustAuthMiddleware,
       offerExistsValidator,
     );
   }
 
-  private async list(_: Request, res: Response): Promise<void> {
-    // const response = await this.favouriteService.getFavorites(req.user.id);
-    this.ok(res, {});
+  private async list(req: Request, res: Response): Promise<void> {
+    const response = await this.favouriteService.getFavorites(req.user!._id);
+    this.ok(res, response);
   }
 
-  private async create(_: Request, res: Response): Promise<void> {
-    // const userId = req.user.id;
-    // const offerId = req.params["offerId"];
-    // await this.favouriteService.addToFavorites(userId, offerId);
-    // const response = await this.offerService.getOffer(userId, offerId)
-    this.ok(res, {});
+  private async create(req: Request, res: Response): Promise<void> {
+    const response = await this.favouriteService.addToFavorites(
+      req.user!._id,
+      req.params["offerId"],
+    );
+    this.ok(res, response);
   }
 
-  private async remove(_: Request, res: Response): Promise<void> {
-    // const userId = req.user.id;
-    // const offerId = req.params["offerId"];
-    // const response = await this.favouriteService.removeFromFavorites(userId, offerId);
-    this.ok(res, {});
+  private async remove(req: Request, res: Response): Promise<void> {
+    const response = await this.favouriteService.removeFromFavorites(
+      req.user!._id,
+      req.params["offerId"],
+    );
+    this.ok(res, response);
   }
 }

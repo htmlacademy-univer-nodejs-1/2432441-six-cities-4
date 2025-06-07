@@ -5,6 +5,7 @@ import { CommentController } from "./app/controllers/comment.js";
 import { FavouriteController } from "./app/controllers/favourite.js";
 import { OfferController } from "./app/controllers/offer.js";
 import { UserController } from "./app/controllers/user.js";
+import { MiddlewareFactory } from "./app/middlewares/factory.js";
 import { Component } from "./component.js";
 import { ConfigProvider } from "./config/provider.js";
 import { Database } from "./database/database.js";
@@ -112,6 +113,10 @@ export class DIContainer {
     this.container
       .bind(Component.CommentController)
       .to(CommentController)
+      .inSingletonScope();
+    this.container
+      .bind(Component.MiddlewareFactory)
+      .to(MiddlewareFactory)
       .inSingletonScope();
   }
 }
