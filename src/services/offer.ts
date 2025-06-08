@@ -53,12 +53,11 @@ export class OfferService {
     request: CreateOfferRequest,
   ): Promise<Offer> {
     const offer = await this.offerRepository.create({
-      ...request,
       author: userId,
+      title: request.title,
+      description: request.description,
       city: request.city as City,
-      type: request.type as HousingType,
-      amenities: request.amenities as Amenity[],
-      publicationDate: new Date(),
+      previewImage: request.previewImage,
       images: request.images as [
         string,
         string,
@@ -67,6 +66,17 @@ export class OfferService {
         string,
         string,
       ],
+      isPremium: request.isPremium,
+      type: request.type as HousingType,
+      bedrooms: request.bedrooms,
+      maxGuests: request.maxGuests,
+      price: request.price,
+      amenities: request.amenities as Amenity[],
+      publicationDate: new Date(),
+      coordinates: {
+        latitude: request.coordinates.latitude,
+        longitude: request.coordinates.longitude,
+      },
     });
 
     this.log.info(`Offer created: ${offer._id}`);
@@ -97,10 +107,10 @@ export class OfferService {
     }
 
     const updatedOffer = await this.offerRepository.update(id, {
-      ...request,
+      title: request.title,
+      description: request.description,
       city: request.city as City,
-      type: request.type as HousingType,
-      amenities: request.amenities as Amenity[],
+      previewImage: request.previewImage,
       images: request.images as [
         string,
         string,
@@ -109,6 +119,18 @@ export class OfferService {
         string,
         string,
       ],
+      isPremium: request.isPremium,
+      type: request.type as HousingType,
+      bedrooms: request.bedrooms,
+      maxGuests: request.maxGuests,
+      price: request.price,
+      amenities: request.amenities as Amenity[],
+      coordinates: request.coordinates
+        ? {
+            latitude: request.coordinates.latitude,
+            longitude: request.coordinates.longitude,
+          }
+        : undefined,
     });
 
     if (!updatedOffer) {
@@ -130,6 +152,7 @@ export class OfferService {
     }
 
     await this.offerRepository.delete(id);
+    await this.commentRepository.deleteByOfferId(id);
     this.log.info(`Offer deleted: ${id}`);
   }
 

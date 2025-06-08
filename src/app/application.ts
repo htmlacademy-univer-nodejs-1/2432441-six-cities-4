@@ -9,9 +9,8 @@ import { CommentController } from "./controllers/comment.js";
 import { FavouriteController } from "./controllers/favourite.js";
 import { OfferController } from "./controllers/offer.js";
 import { UserController } from "./controllers/user.js";
-import { ExceptionFilter } from "./middlewares/exception-filter.js";
+import { MiddlewareFactory } from "./middlewares/factory.js";
 import { Middleware } from "./middlewares/interface.js";
-import { StaticServer } from "./middlewares/static-server.js";
 
 @injectable()
 export class Application {
@@ -29,6 +28,8 @@ export class Application {
     private readonly favouriteController: FavouriteController,
     @inject(Component.CommentController)
     private readonly commentController: CommentController,
+    @inject(Component.MiddlewareFactory)
+    private readonly middlewareFactory: MiddlewareFactory,
   ) {
     this.express = express();
   }
@@ -46,10 +47,10 @@ export class Application {
   }
 
   public usePostMiddlewares() {
-    this.addMiddleware(null, new ExceptionFilter(this.logger));
+    this.addMiddleware(null, this.middlewareFactory.exceptionFilter());
     this.addMiddleware(
       "/uploads",
-      new StaticServer(this.configProvider.get().UPLOAD_DIR),
+      this.middlewareFactory.staticServer(this.configProvider.get().UPLOAD_DIR),
     );
   }
 
@@ -69,7 +70,10 @@ export class Application {
   }
 
   private addMiddleware(route: string | null, middleware: Middleware) {
-    if (!route) this.express.use(middleware.handle.bind(middleware));
-    else this.express.use(route, middleware.handle.bind(middleware));
+    if (!route) {
+      this.express.use(middleware.handle.bind(middleware));
+    } else {
+      this.express.use(route, middleware.handle.bind(middleware));
+    }
   }
 }

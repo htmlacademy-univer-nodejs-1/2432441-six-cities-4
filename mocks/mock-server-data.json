@@ -117,13 +117,6 @@
       ["Breakfast", "Washer", "Towels", "Baby seat", "Fridge"],
       ["Air conditioning", "Laptop friendly workspace", "Towels"]
     ],
-    "author": [
-      "123456789012345678900000",
-      "123456789012345678900001",
-      "123456789012345678900002",
-      "123456789012345678900003",
-      "123456789012345678900004"
-    ],
     "coordinates": [
       { "latitude": 55.7558, "longitude": 37.6176 },
       { "latitude": 59.9343, "longitude": 30.3351 },

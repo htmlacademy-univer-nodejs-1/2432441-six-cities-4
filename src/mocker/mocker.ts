@@ -3,7 +3,7 @@ import { Types } from "mongoose";
 import fs from "node:fs";
 import readline from "node:readline";
 import { Amenity, City, HousingType, Offer } from "../models/offer.js";
-import { User } from "../models/user.js";
+import { User, UserType } from "../models/user.js";
 
 export class Mocker {
   public static async *readOffers(filename: string): AsyncIterable<Offer> {
@@ -30,11 +30,22 @@ export class Mocker {
         maxGuests,
         price,
         amenities,
-        author,
         coordinates,
         createdAt,
         updatedAt,
       ] = line.split("\t");
+
+      const authorId = new Types.ObjectId().toString();
+      const author: User = {
+        _id: authorId,
+        name: "username",
+        email: `${authorId}@mail.ru`,
+        password: "hashedpassword",
+        type: UserType.Regular,
+        favorites: [],
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
 
       yield {
         _id: new Types.ObjectId().toString(),
@@ -57,7 +68,7 @@ export class Mocker {
         maxGuests: parseInt(maxGuests, 10),
         price: parseInt(price, 10),
         amenities: amenities.split(",") as Amenity[],
-        author: author as unknown as Ref<User>,
+        author: author as Ref<User>,
         coordinates: {
           latitude: parseFloat(coordinates.split(",")[0]),
           longitude: parseFloat(coordinates.split(",")[1]),
@@ -73,7 +84,7 @@ export class Mocker {
   public static async writeOffers(filename: string, offers: Iterable<Offer>) {
     const file = fs.createWriteStream(filename);
     file.write(
-      "title	description	publicationDate	city	previewImage	images	isPremium	isFavorite	rating	type	bedrooms	maxGuests	price	amenities	author	commentsCount	coordinates	createdAt	updatedAt\n",
+      "title	description	publicationDate	city	previewImage	images	isPremium	isFavorite	rating	type	bedrooms	maxGuests	price	amenities commentsCount	coordinates	createdAt	updatedAt\n",
     );
     for (const offer of offers) {
       file.write(this.offerToTsv(offer));
@@ -100,7 +111,6 @@ export class Mocker {
       offer.maxGuests.toString(),
       offer.price.toString(),
       amenitiesString,
-      offer.author,
       coordinatesString,
       offer.createdAt,
       offer.updatedAt,
