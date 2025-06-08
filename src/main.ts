@@ -1,9 +1,9 @@
 #!/usr/bin/env node
 
 import { program } from "commander";
-import { Mocker } from "./mocker/mocker.js";
-import { Generator } from "./generator/generator.js";
 import { DIContainer } from "./dicontainer.js";
+import { Generator } from "./generator/generator.js";
+import { Mocker } from "./mocker/mocker.js";
 
 program.name("six-cities").version(process.env.npm_package_version ?? "");
 
@@ -12,9 +12,10 @@ program.description("run application").action(async () => {
 
   const databaseClient = container.getDatabaseClient();
   const configProvider = container.getConfigProvider();
-  await databaseClient.connect(configProvider.get().DB_URI);
 
+  await databaseClient.connect(configProvider.get().DB_URI);
   const application = container.getApplication();
+
   application.init();
 });
 
@@ -29,6 +30,7 @@ program
 
     try {
       const offers = Mocker.readOffers(source);
+
       await importer.import(offers);
     } catch (error) {
       console.error("Failed to import data:", error);
