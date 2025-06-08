@@ -50,7 +50,16 @@ export class UserRepository {
   }
 
   public async getFavorites(userId: string): Promise<Offer[]> {
-    const user = await this.model.findById(userId).populate("favorites").exec();
+    const user = await this.model
+      .findById(userId)
+      .populate({
+        path: "favorites",
+        populate: {
+          path: "author",
+          model: "User",
+        },
+      })
+      .exec();
     return (user?.favorites as Offer[]) || [];
   }
 

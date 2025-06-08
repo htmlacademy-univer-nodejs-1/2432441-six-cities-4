@@ -27,9 +27,18 @@ export class CommentRepository {
   ): Promise<Comment[]> {
     return this.model
       .find({ offer: offerId })
+      .sort({ createdAt: -1 })
       .populate("author")
       .skip(skip)
       .limit(limit)
+      .exec();
+  }
+
+  async deleteByOfferId(offerId: string): Promise<void> {
+    await this.model
+      .deleteMany({
+        offer: new Types.ObjectId(offerId),
+      })
       .exec();
   }
 
@@ -95,7 +104,7 @@ export class CommentRepository {
         const comment = result.find((com) => com.offerId === offerId);
         acc[offerId] = {
           count: comment?.count || 0,
-          rating: comment?.rating || 0,
+          rating: comment ? parseFloat(comment.rating.toFixed(1)) : 0,
         };
         return acc;
       },

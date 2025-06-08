@@ -21,7 +21,9 @@ export class Generator {
   }
 
   private generateOffer(): Offer {
-    if (this.data === undefined) throw Error("you must load the data first");
+    if (this.data === undefined) {
+      throw Error("you must load the data first");
+    }
 
     return {
       _id: new Types.ObjectId().toString(),
@@ -37,7 +39,7 @@ export class Generator {
       maxGuests: random.choice(this.data.maxGuests)!,
       price: random.choice(this.data.price)!,
       amenities: random.choice(this.data.amenities)! as Amenity[],
-      author: random.choice(this.data.author)! as unknown as Ref<User>,
+      author: undefined! as Ref<User>,
       coordinates: random.choice(this.data.coordinates)!,
       createdAt: random.choice(this.data.createdAt)!,
       updatedAt: random.choice(this.data.updatedAt)!,

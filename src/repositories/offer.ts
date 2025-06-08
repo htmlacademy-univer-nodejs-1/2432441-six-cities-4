@@ -1,9 +1,9 @@
-import { inject, injectable } from "inversify";
-import { Offer } from "../models/offer.js";
 import { getModelForClass } from "@typegoose/typegoose";
-import { Database } from "../database/database.js";
-import { Component } from "../component.js";
+import { inject, injectable } from "inversify";
 import { Model } from "mongoose";
+import { Component } from "../component.js";
+import { Database } from "../database/database.js";
+import { Offer } from "../models/offer.js";
 
 @injectable()
 export class OfferRepository {
@@ -25,7 +25,13 @@ export class OfferRepository {
   }
 
   public async findAll(limit: number, skip: number): Promise<Offer[]> {
-    return this.model.find().populate("author").skip(skip).limit(limit).exec();
+    return this.model
+      .find()
+      .sort({ publicationDate: -1 })
+      .populate("author")
+      .skip(skip)
+      .limit(limit)
+      .exec();
   }
 
   public async findPremiumByCity(
@@ -35,6 +41,7 @@ export class OfferRepository {
   ): Promise<Offer[]> {
     return this.model
       .find({ city, isPremium: true })
+      .sort({ publicationDate: -1 })
       .populate("author")
       .skip(skip)
       .limit(limit)

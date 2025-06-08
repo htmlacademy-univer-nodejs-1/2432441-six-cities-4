@@ -13,7 +13,6 @@ export type TestData = {
   maxGuests: number[];
   price: number[];
   amenities: Amenity[][];
-  author: string[];
   coordinates: { latitude: number; longitude: number }[];
   createdAt: Date[];
   updatedAt: Date[];
